@@ -1,16 +1,4 @@
-def readTxt(filesource):
-    '''
-    Reads in file from filesource and returns the file content as lists
-    with double space to split each element.
-    '''
-    data = []
-    with open(filesource, "r") as f:
-        for line in f.readlines():
-            line = line.strip("\n")
-            line = line.split("  ")
-            data.append(line)
-    return data
-
+from readTxt import readTxt
 
 def read_report_filter(reportfilter, filter_column_name, filter_condition):
     '''
@@ -94,16 +82,14 @@ def process_dynamic_report_sqlquery(sqlquery):
     return inv_result_dic
 
 def find_filter_in_sql(dynamic_report_filesource, dynamic_report_sqlsource,
-                       dynamic_report_report_filter, dynamic_report_column_format,
-                       filter_name_in_sql, filter_condition_in_sql, report_column_value):
+                       dynamic_report_report_filter,
+                       filter_name_in_sql, filter_condition_in_sql):
     '''
     Mutates filter_name_in_sql to be the sql query colume name needed corresponding to the
     report filter's column heading, and filter_condition_in_sql to be the required filter
-    condition corresponding to each column heading. It also mutates report_column_value to
-    get all the corresponding source column value for the column heading obtained from
-    dynamic_report_column_format
+    condition corresponding to each column heading.
 
-    requires: filename, filename, filename, filename, [], [], [] -> None
+    requires: filename, filename, filename, [], [] -> None
     effects: mutates filter_name_in_sql and filter_condition_in_sql
     '''
 
@@ -113,8 +99,6 @@ def find_filter_in_sql(dynamic_report_filesource, dynamic_report_sqlsource,
     source_to_sql_column = process_dynamic_report_sqlquery(
         readTxt(dynamic_report_sqlsource))
 
-    report_column_headings = readTxt(dynamic_report_column_format)
-
     read_report_filter(dynamic_report_report_filter, filter_name_in_sql, filter_condition_in_sql)
 
     # processing the sql query
@@ -123,22 +107,6 @@ def find_filter_in_sql(dynamic_report_filesource, dynamic_report_sqlsource,
         sql_query_name = source_to_sql_column[source_name]
         filter_name_in_sql[pos] = sql_query_name
 
-    # processing for report format
-    #print(report_column_headings)
-    for heading in report_column_headings:
-        if heading == [' ']:
-            # this is to drop the copied filter, sort signs they were not readable which coverted to
-            # an empty string when copied to txt doc
-            continue
-        source_name = heading_to_source_column[heading[0]]
-        source_name = source_name.replace(" ", "_")
-        source_name = source_name.replace("#", "_")
-        source_name = source_name.replace("/", "_")
-        source_name = "[" + source_name
-        report_column_value.append(source_name)
-
-    with open(dynamic_report_column_format, 'w') as f:
-        f.write("\n".join(report_column_value))
 
 
 

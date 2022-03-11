@@ -1,6 +1,6 @@
-import match_sqlquery_column_name as ma
-import sqlquery_generator as gensql
-import report_formatting as rformat
+from match_sqlquery_column_name import find_filter_in_sql
+from sqlquery_generator import process_and_merge
+from report_formatting import report_formatting
 
 if __name__ == '__main__':
     # write sql query needed
@@ -13,20 +13,15 @@ if __name__ == '__main__':
     filter_condition_in_sql = []
     report_column_value = []
 
-    report_formatting(dynamic_report_column_format)
+    report_formatting(dynamic_report_column_format, dynamic_report_filesource)
 
-    ma.find_filter_in_sql(dynamic_report_filesource, dynamic_report_sqlsource,
-                           dynamic_report_report_filter, dynamic_report_column_format,
-                          filter_name_in_sql, filter_condition_in_sql, report_column_value)
-    #print(filter_name_in_sql)
-    #print(filter_condition_in_sql)
+    find_filter_in_sql(dynamic_report_filesource, dynamic_report_sqlsource,
+                           dynamic_report_report_filter,
+                          filter_name_in_sql, filter_condition_in_sql)
 
-    #print(srm_to_sql_cond(var, condition, 'or'))
+    print(process_and_merge(filter_name_in_sql, filter_condition_in_sql))
 
-    print(gensql.process_and_merge(filter_name_in_sql, filter_condition_in_sql))
 
-    # give me the corresponding column value for column formatting
-    print("\n".join(report_column_value))
 
 
 
