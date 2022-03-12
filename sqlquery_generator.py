@@ -89,10 +89,10 @@ def date_filter(name, cond, name_pos):
     if af in cond:
         ans = f"AND ({name} > TO_DATE(\'{cond[len(af) + 1:]}\', 'MM/DD/YYYY'))\n"
     elif bf in cond:
-        ans = f"AND ({name} < TO_DATE(\'{cond[len(af) + 1:]}\', 'MM/DD/YYYY'))\n"
+        ans = f"AND ({name} < TO_DATE(\'{cond[len(bf) + 1:]}\', 'MM/DD/YYYY'))\n"
     elif lm in cond:
         ans = f"AND ({name} > Last_Day(ADD_MONTHS(current_date, -2))\n\
-        AND {name} <= Last_Day(ADD_MONTHS(current_date, -1)))"
+        AND {name} <= Last_Day(ADD_MONTHS(current_date, -1)))\n"
     elif bt in cond:
         cond = cond.split("And")
         ans = f"AND ({name} BETWEEN TO_DATE(\'{cond[0][len(bt) + 1:]}\', 'MM/DD/YYYY')\n AND " \

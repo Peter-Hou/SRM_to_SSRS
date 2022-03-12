@@ -13,13 +13,16 @@ if __name__ == '__main__':
     filter_condition_in_sql = []
     report_column_value = []
 
-    report_formatting(dynamic_report_column_format, dynamic_report_filesource)
+
 
     find_filter_in_sql(dynamic_report_filesource, dynamic_report_sqlsource,
-                           dynamic_report_report_filter,
+                               dynamic_report_report_filter,
                           filter_name_in_sql, filter_condition_in_sql)
 
     print(process_and_merge(filter_name_in_sql, filter_condition_in_sql))
+
+    report_formatting(dynamic_report_column_format, dynamic_report_filesource)
+
 
 
 

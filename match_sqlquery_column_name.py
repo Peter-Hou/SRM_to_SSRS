@@ -1,4 +1,5 @@
 from readTxt import readTxt
+import sys
 
 def read_report_filter(reportfilter, filter_column_name, filter_condition):
     '''
@@ -12,14 +13,16 @@ def read_report_filter(reportfilter, filter_column_name, filter_condition):
                 the column name with its filter condition, or at the very end of the
                 entire filter
     '''
-    data = []
+    filter = []
     with open(reportfilter, "r") as f:
         for line in f.readlines():
             line = line.strip("\n")
-            data.append(line)
-
+            filter.append(line)
+    data = filter[:-1]
+    data.append(filter[-1].strip("\t")) #get rid of the useless tab bar at the end
     found_tab_char = False
     condition = ""
+    print(data)
     for char in data:
         if '\t' in char:
             if found_tab_char:
@@ -66,14 +69,16 @@ def process_dynamic_report_sqlquery(sqlquery):
                 as the sql query column
     '''
 
-    separator = "AS"
+    separator = " AS "
     result_dic = {}
     name_differs = 2  # source column id is different from the sql query column name
+
 
     for entry in sqlquery:
         str_for_process = entry[0]
         str_for_process = str_for_process.strip('\t, ')
         list_for_process = str_for_process.split(separator)
+        #print(list_for_process)
         if len(list_for_process) == name_differs:
             result_dic[list_for_process[0].strip("\" ")] = list_for_process[1].strip("\" ")
         else:
@@ -102,9 +107,32 @@ def find_filter_in_sql(dynamic_report_filesource, dynamic_report_sqlsource,
     read_report_filter(dynamic_report_report_filter, filter_name_in_sql, filter_condition_in_sql)
 
     # processing the sql query
+    print(filter_name_in_sql)
+    print(filter_condition_in_sql)
+    print(source_to_sql_column)
+
+    sql_query_name = ""
+
     for pos in range(len(filter_name_in_sql)):
         source_name = heading_to_source_column[filter_name_in_sql[pos]]
-        sql_query_name = source_to_sql_column[source_name]
+        try:
+            sql_query_name = source_to_sql_column[source_name]
+        except:
+            ans = []
+            for keys in source_to_sql_column:
+                if source_name in keys:
+                    ans.append(source_to_sql_column[keys])
+            if len(ans) > 1:
+                choice_made = input(f"tables with same column name exit, pick the right one for {source_name} \n"
+                            f"the options are {ans}")
+                while choice_made not in ans:
+                    print("wrong input, select from {ans} please")
+            if ans == []:
+                sys.exit(f"Did not find the key word {source_name}")
+            choice_made = ans[0]
+            sql_query_name = choice_made
+        if sql_query_name == "":
+            sys.exit(f"Didn't fin the query name needed for {source_name}")
         filter_name_in_sql[pos] = sql_query_name
 
 
