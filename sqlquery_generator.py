@@ -7,6 +7,11 @@ ne = 'Not Equal To'
 eq = 'Equal To'
 bg = 'Begins With'
 dbg = "Doesn't Begin With"
+dew = "Doesn't End With"
+im = "Is Empty"
+inm = "Is Not Empty"
+gt = "Greater Than"
+lt = "Less Than"
 
 def general_filter(name, srm_cond, name_pos):
     '''
@@ -42,9 +47,19 @@ def general_filter(name, srm_cond, name_pos):
             value = f"NOT LIKE \'{split_cond[pos][len(dbg) + 1:].strip()}%\'"
         elif con in split_cond[pos]:
             value = f"LIKE \'%{split_cond[pos][len(con) + 1:].strip()}%\'"
+        elif dew in split_cond[pos]:
+            value = f"NOT LIKE \'{split_cond[pos][len(dew) + 1:].strip()}%\'"
+        elif im in split_cond[pos]:
+            value = f"= ' '"
+        elif inm in split_cond[pos]:
+            value = f"<> ' '"
+        elif gt in split_cond[pos]:
+            value = f"> {split_cond[pos][len(gt) + 1:].strip()}"
+        elif lt in split_cond[pos]:
+            value = f"< {split_cond[pos][len(lt) + 1:].strip()}"
         else:
             value = "0"
-            sys.exit(("Error Error general keyword does not exist"))
+            sys.exit((f"Error Error general keyword {split_cond[pos]} does not exist"))
 
         if need_ltrim == "yes":
             tv = "LTRIM(" + name + ") " + value
@@ -75,6 +90,12 @@ af = "After"
 bf = "Before"
 lm = "last month"
 bt = "Between"
+l = "last"
+dni = "days not including today."
+mtd = "Month to Date"
+nit = "not including today"
+
+
 def date_filter(name, cond, name_pos):
     '''
     Returns the sql query corresponding to the condition statement, srm_cond
@@ -86,7 +107,12 @@ def date_filter(name, cond, name_pos):
     requires: name contain date or Date or DATE
     '''
 
-    if af in cond:
+    print(cond)
+    if af in cond and bf in cond:
+        cond = cond.split("and")
+        ans = f"AND ({name} > TO_DATE(\'{cond[0][len(af) + 1:]}\', 'MM/DD/YYYY')\n AND " \
+              f"{name}  < TO_DATE(\'{cond[1][len(bf) + 2:]}\', 'MM/DD/YYYY'))\n"
+    elif af in cond:
         ans = f"AND ({name} > TO_DATE(\'{cond[len(af) + 1:]}\', 'MM/DD/YYYY'))\n"
     elif bf in cond:
         ans = f"AND ({name} < TO_DATE(\'{cond[len(bf) + 1:]}\', 'MM/DD/YYYY'))\n"
@@ -97,6 +123,21 @@ def date_filter(name, cond, name_pos):
         cond = cond.split("And")
         ans = f"AND ({name} BETWEEN TO_DATE(\'{cond[0][len(bt) + 1:]}\', 'MM/DD/YYYY')\n AND " \
               f"TO_DATE(\'{cond[1][1:]}\', 'MM/DD/YYYY'))\n"
+    elif l in cond and dni in cond:
+        num = [int(n) for n in cond.split() if n.isdigit()][0]
+        ans = f"AND ({name} >= TO_DATE(current_date - {num}) \n\
+                AND {name} <= TO_DATE(current_date -1))\n"
+    elif l in cond:
+        num = [int(n) for n in cond.split() if n.isdigit()][0]
+        ans = f"AND ({name} >= TO_DATE(current_date - {num}) \n\
+                        AND {name} <= TO_DATE(current_date))\n"
+    elif mtd in cond:
+        if nit in cond:
+            ans = f"AND({name} > LAST_DAY(ADD_MONTHS(current_date, -1)) AND \n\
+            {name} < TO_DATE(current_date))"
+        else:
+            ans = f"AND({name} > LAST_DAY(ADD_MONTHS(current_date, -1)) AND \n\
+                        {name} <= TO_DATE(current_date))"
     else:
         ans = "0"
         sys.exit("Error Error Date Key Word does not exist")
@@ -113,7 +154,7 @@ def srm_to_sql_cond(name, cond, name_pos):
     srm_to_sql_cond: Str Str -> Str
     '''
 
-    datecases = ["Date", "date", "DATE"]
+    datecases = ["Date", "date", "DATE", 'OPENED', 'opened', 'Opened']
 
     for date in datecases:
         if date in name:

@@ -1,4 +1,4 @@
-from readTxt import readTxt
+from readTxt import readTxt, read_dynamic_report_query
 import sys
 
 def read_report_filter(reportfilter, filter_column_name, filter_condition):
@@ -73,9 +73,9 @@ def process_dynamic_report_sqlquery(sqlquery):
     result_dic = {}
     name_differs = 2  # source column id is different from the sql query column name
 
-
+    print(sqlquery)
     for entry in sqlquery:
-        str_for_process = entry[0]
+        str_for_process = entry
         str_for_process = str_for_process.strip('\t, ')
         list_for_process = str_for_process.split(separator)
         #print(list_for_process)
@@ -102,7 +102,7 @@ def find_filter_in_sql(dynamic_report_filesource, dynamic_report_sqlsource,
         readTxt(dynamic_report_filesource))
 
     source_to_sql_column = process_dynamic_report_sqlquery(
-        readTxt(dynamic_report_sqlsource))
+        read_dynamic_report_query(dynamic_report_sqlsource))
 
     read_report_filter(dynamic_report_report_filter, filter_name_in_sql, filter_condition_in_sql)
 
@@ -115,22 +115,20 @@ def find_filter_in_sql(dynamic_report_filesource, dynamic_report_sqlsource,
 
     for pos in range(len(filter_name_in_sql)):
         source_name = heading_to_source_column[filter_name_in_sql[pos]]
-        try:
-            sql_query_name = source_to_sql_column[source_name]
-        except:
-            ans = []
-            for keys in source_to_sql_column:
-                if source_name in keys:
-                    ans.append(source_to_sql_column[keys])
-            if len(ans) > 1:
-                choice_made = input(f"tables with same column name exit, pick the right one for {source_name} \n"
-                            f"the options are {ans}")
-                while choice_made not in ans:
-                    print("wrong input, select from {ans} please")
-            if ans == []:
-                sys.exit(f"Did not find the key word {source_name}")
+        ans = []
+        for keys in source_to_sql_column:
+            if source_name.lower() in keys.lower():
+                ans.append(source_to_sql_column[keys])
+        if len(ans) > 1:
+            choice_made = input(f"tables with same column name exit, pick the right one for {source_name} \n"
+                        f"the options are {ans}")
+            while choice_made not in ans:
+                print("wrong input, select from {ans} please")
+        elif ans == []:
+            sys.exit(f"Did not find the key word {source_name}")
+        else:
             choice_made = ans[0]
-            sql_query_name = choice_made
+        sql_query_name = choice_made
         if sql_query_name == "":
             sys.exit(f"Didn't fin the query name needed for {source_name}")
         filter_name_in_sql[pos] = sql_query_name
