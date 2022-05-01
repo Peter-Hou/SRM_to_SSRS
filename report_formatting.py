@@ -77,7 +77,7 @@ def report_formatting(dynamic_report_column_format, dynamic_report_filesource):
     #while keyboard.read_key() != start_pasting:
      #   print(f"move your cursor to the first box for column value, and press {start_pasting} key to start")
 
-    #pyautogui.press("esc")
+    pyautogui.press("esc")
     pyautogui.press("down")
     pyautogui.keyDown("ctrl")
     pyautogui.keyDown("left")

@@ -186,3 +186,4 @@ def process_and_merge(filter_name_in_sql, filter_condition_in_sql):
     final_sql_query = "".join(final_sql_query)
     return final_sql_query
 
+
